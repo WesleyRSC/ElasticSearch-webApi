@@ -1,6 +1,7 @@
-﻿using Elastic.Clients.Elasticsearch;
+﻿
 using ElasticSearch.API.Models;
 using Microsoft.AspNetCore.Mvc;
+using Nest;
 
 namespace ElasticSearch.API.Controllers
 {
@@ -8,13 +9,13 @@ namespace ElasticSearch.API.Controllers
     [ApiController]
     public class ProductsController : ControllerBase
     {
-        private readonly ElasticsearchClient _elasticClient;
+        private readonly IElasticClient _elasticClient;
 
         private readonly ILogger<ProductsController> _logger;
 
         private readonly string _indexName = "my-products";
 
-        public ProductsController(ElasticsearchClient client, ILogger<ProductsController> logger)
+        public ProductsController(IElasticClient client, ILogger<ProductsController> logger)
         {
             _elasticClient = client;
             _logger = logger;
@@ -37,7 +38,7 @@ namespace ElasticSearch.API.Controllers
         [HttpPost]
         public async Task<IActionResult> AddProduct(Product product)
         {
-            var response = await _elasticClient.CreateAsync(product, index: _indexName);
+            var response = await _elasticClient.IndexDocumentAsync(product);
 
             return Ok(response);
         }

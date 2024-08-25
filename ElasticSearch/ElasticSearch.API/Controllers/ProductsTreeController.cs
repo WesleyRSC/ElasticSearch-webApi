@@ -1,5 +1,5 @@
-﻿using Elastic.Clients.Elasticsearch;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using Nest;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -9,10 +9,10 @@ namespace ElasticSearch.API.Controllers
     [ApiController]
     public class ProductsTreeController : ControllerBase
     {
-        private readonly ElasticsearchClient _elasticClient;
+        private readonly IElasticClient _elasticClient;
 
         private readonly ILogger<ProductsTreeController> _logger;
-        public ProductsTreeController(ElasticsearchClient client, ILogger<ProductsTreeController> logger)
+        public ProductsTreeController(IElasticClient client, ILogger<ProductsTreeController> logger)
         {
             _elasticClient = client;
             _logger = logger;
