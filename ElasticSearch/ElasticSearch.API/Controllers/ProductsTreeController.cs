@@ -1,4 +1,6 @@
 ﻿using Elastic.Clients.Elasticsearch;
+using Elastic.Transport;
+using ElasticSearch.API.Models;
 using Microsoft.AspNetCore.Mvc;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -20,16 +22,36 @@ namespace ElasticSearch.API.Controllers
 
         // GET: api/<ProductsTreeController>
         [HttpGet]
-        public IEnumerable<string> Get()
+        public async Task<IActionResult> GetAllProducts()
         {
-            return new string[] { "value1", "value2" };
+            var body = """
+            {
+              "query": {
+                "match": {
+                  "Materials": "Polyester"
+                }
+              }
+            }
+            """;
+
+            var result = await _elasticClient.Transport.RequestAsync<StringResponse>(Elastic.Transport.HttpMethod.GET, "product-tree/_search", PostData.String(body));
+
+            return Ok(result.Body);
         }
 
         // GET api/<ProductsTreeController>/5
-        [HttpGet("{id}")]
-        public string Get(int id)
+        [HttpGet("FilterByKeyword")]
+        public async Task<IActionResult> GetProducts(string? keyword)
         {
-            return "value";
+            var result = await _elasticClient.SearchAsync<ProductTree>(
+                s => s.Query(q =>
+                    q.QueryString(
+                        d => d.Query('*' + keyword + '*').Fields(fields: "description")
+                    )
+                ).Size(1000).Index("product-tree")
+             );
+
+            return Ok(result.Documents.ToList());
         }
 
         // POST api/<ProductsTreeController>
